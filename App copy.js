@@ -4,9 +4,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; 
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import DataIkan from './src/ikan/Dataikan'
-import Formikan from './src/ikan/Formikan'
-import Detailikan from './src/ikan/Detailikan'
 
 const Stack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator();
@@ -53,14 +50,14 @@ function Profile({navigation}) {
     </View>
   );
 }
-// function DataIkan({navigation}) {
-//   return (
-//     <View style={styles.container}>
-//       <Text>DataIkan</Text>
-//       <Button onPress={()=>navigation.navigate('Login')} title='Logout'/>
-//     </View>
-//   );
-// }
+function DataIkan({navigation}) {
+  return (
+    <View style={styles.container}>
+      <Text>DataIkan</Text>
+      <Button onPress={()=>navigation.navigate('Login')} title='Logout'/>
+    </View>
+  );
+}
 function Drawer(){
   return (
     <DrawerNav.Navigator>
@@ -87,9 +84,6 @@ export default function App() {
       {/* <Stack.Screen name="Drawer" component={Drawer} /> */}
       <Stack.Screen name="Tab" component={Tab} />
       <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="Formikan" component={Formikan} />
-      <Stack.Screen name="Detailikan" component={Detailikan} />
-      <Stack.Screen name='DataIkan' component={DataIkan}/>
       <Stack.Screen name="Signup" component={Signup} />
     </Stack.Navigator>
   </NavigationContainer>
