@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const styles = StyleSheet.create({
     input: {
@@ -120,44 +121,67 @@ class Detailikan extends Component {
         // kategori: this.props.route.params.kategori,
         // harga: this.props.route.params.harga
     }
-    getdetailikan = () => {
-        fetch('http://192.168.43.122/mobile_backend/public/ikan/' + this.state.idikan)
-            .then((response) => response.json())
-            .then((json) => {
-                // console.log(json);
-                this.setState({ dataIkan: json });
-                // this.setState({ idikan: this.state.dataIkan.kode_ikan });
-                this.setState({ kodeikan: this.state.dataIkan.kode_ikan });
-                this.setState({ namaikan: this.state.dataIkan.nama_ikan });
-                this.setState({ kategory: this.state.dataIkan.kategori });
-                this.setState({ price: this.state.dataIkan.harga });
-            })
-            .catch((err) => console.log(err))
-    }
-    deleteIkan = () => {
+    getdetailikan = async () => {
+        let token_key = await AsyncStorage.getItem('@tokenLogin');
         fetch('http://192.168.43.122/mobile_backend/public/ikan/' + this.state.idikan, {
-            method: 'DELETE',
+            method: 'GET',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token_key
             },
         })
             .then((response) => response.json())
             .then((json) => {
-                // console.log(json);
-                (json.status) == 200 ? Alert.alert('Success', 'Data Ikan Berhasil Dihapus !!') : '';
-                this.props.navigation.push('DataIkan');
-                // this.getdataIkan();
+                if (json.status == 401) {
+                    ToastAndroid.show(`${json.msg}`, ToastAndroid.LONG);
+                    this.props.navigation.push('Login');
+                } else {
+                    // console.log(json);
+                    this.setState({ dataIkan: json });
+                    // this.setState({ idikan: this.state.dataIkan.kode_ikan });
+                    this.setState({ kodeikan: this.state.dataIkan.kode_ikan });
+                    this.setState({ namaikan: this.state.dataIkan.nama_ikan });
+                    this.setState({ kategory: this.state.dataIkan.kategori });
+                    this.setState({ price: this.state.dataIkan.harga });
+
+                }
+            })
+            .catch((err) => console.log(err))
+    }
+    deleteIkan = async () => {
+        let token_key = await AsyncStorage.getItem('@tokenLogin');
+        fetch('http://192.168.43.122/mobile_backend/public/ikan/' + this.state.idikan, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token_key
+            },
+        })
+            .then((response) => response.json())
+            .then((json) => {
+                if (json.status == 401) {
+                    ToastAndroid.show(`${json.msg}`, ToastAndroid.LONG);
+                    this.props.navigation.push('Login');
+                } else {
+                    // console.log(json);
+                    (json.status) == 200 ? Alert.alert('Success', 'Data Ikan Berhasil Dihapus !!') : '';
+                    this.props.navigation.push('DataIkan');
+                    // this.getdataIkan();
+                }
             })
             .catch((err) => console.log(err))
     }
 
-    updateIkan = () => {
+    updateIkan = async () => {
+        let token_key = await AsyncStorage.getItem('@tokenLogin');
         fetch('http://192.168.43.122/mobile_backend/public/ikan/' + this.state.idikan, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token_key
             },
             body: JSON.stringify({
                 kode_ikan: this.state.kodeikan,
@@ -168,10 +192,15 @@ class Detailikan extends Component {
         })
             .then((response) => response.json())
             .then((json) => {
-                // console.log(json);
-                ToastAndroid.show(`Data Ikan ${this.state.namaikan} Berhasil Diupdate !!`, ToastAndroid.SHORT);
-                // (json.status) == 201 ? Alert.alert('Success', 'Data Ikan Berhasil Diupdate !!') : '';
-                this.props.navigation.push('DataIkan');
+                if (json.status == 401) {
+                    ToastAndroid.show(`${json.msg}`, ToastAndroid.LONG);
+                    this.props.navigation.push('Login');
+                } else {
+                    // console.log(json);
+                    ToastAndroid.show(`Data Ikan ${this.state.namaikan} Berhasil Diupdate !!`, ToastAndroid.SHORT);
+                    // (json.status) == 201 ? Alert.alert('Success', 'Data Ikan Berhasil Diupdate !!') : '';
+                    this.props.navigation.push('DataIkan');
+                }
             })
             .catch((err) => console.log(err))
     }

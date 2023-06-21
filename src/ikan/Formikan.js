@@ -13,6 +13,8 @@ import {
   } from "react-native";
   import { LinearGradient } from 'expo-linear-gradient';
   import Icon from 'react-native-vector-icons/FontAwesome5';
+  import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ToastAndroid } from 'react-native';
 
   
     const styles = StyleSheet.create({
@@ -91,12 +93,14 @@ class Formikan extends Component {
             .then((json)=>this.setState({dataIkan:json}))
             .catch((err)=>console.log(err))
      }
-     saveDataIkan=()=>{
+     saveDataIkan=async()=>{
+        let token_key = await AsyncStorage.getItem('@tokenLogin');
         fetch('http://192.168.43.122/mobile_backend/public/ikan',{
             method:'POST',
             headers:{
                 Accept:'application/json',
-                'Content-Type':'application/json'
+                'Content-Type':'application/json',
+                'Authorization':'Bearer '+token_key
             },
             body:JSON.stringify({
                 kode_ikan:this.state.kode_ikan,
@@ -107,10 +111,16 @@ class Formikan extends Component {
         })
         .then((response)=>response.json())
         .then((json)=>{
-            (json.status)==201 ? Alert.alert('Success','Data Ikan Berhasil Disimpan !!'):'';
-            this.getdataIkan();
-            // this.props.navigation.goBack()
-            this.props.navigation.push('DataIkan');
+            if(json.status==401){
+                ToastAndroid.show(`${json.msg}`,ToastAndroid.LONG);
+                this.props.navigation.push('Login');
+            }else{
+                (json.status)==201 ? Alert.alert('Success','Data Ikan Berhasil Disimpan !!'):'';
+                this.getdataIkan();
+                // this.props.navigation.goBack()
+                this.props.navigation.push('DataIkan');
+
+            }
         })
         .catch((err)=>console.log(err))
         .finally(()=>{

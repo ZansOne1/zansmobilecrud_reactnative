@@ -10,11 +10,14 @@ import {
     StyleSheet,
     Text,
     TextInput,
+    ToastAndroid,
     TouchableOpacity,
     View,
   } from "react-native";
   import { LinearGradient } from 'expo-linear-gradient';
   import Icon from 'react-native-vector-icons/FontAwesome5';
+  import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Button } from "react-native";
 
 //   const styles = StyleSheet.create({
 //     input: {
@@ -59,10 +62,24 @@ class Dataikan extends Component {
         refresh:false
      }
 
-     getdataIkan=()=>{
-        fetch('http://192.168.43.122/mobile_backend/public/ikan')
+     getdataIkan=async()=>{
+        let token_key = await AsyncStorage.getItem('@tokenLogin');
+        fetch('http://192.168.43.122/mobile_backend/public/ikan',{
+        method:'GET',
+        headers:{
+            'Authorization':'Bearer '+token_key
+        }
+        })
             .then((response)=>response.json())
-            .then((json)=>this.setState({dataIkan:json}))
+            .then((json)=>{
+                if(json.status==401){
+                    ToastAndroid.show(`${json.msg}`,ToastAndroid.LONG);
+                    this.props.navigation.push('Login');
+                }else{
+                    this.setState({dataIkan:json})
+
+                }
+        })
             .catch((err)=>console.log(err))
      }
     //  saveDataIkan=()=>{
@@ -92,6 +109,17 @@ class Dataikan extends Component {
     //         this.setState({harga:''});
     //     })
     //  }
+    removeToken = async () => {
+        try {
+          await AsyncStorage.removeItem('@tokenLogin');
+          this.props.navigation.push('Login');
+        } catch(e) {
+          // remove error
+          console.log(e);
+        }
+      
+        console.log('Done.')
+      }
      componentDidMount = () => {
        this.getdataIkan();
      }
@@ -170,7 +198,7 @@ class Dataikan extends Component {
                         <Text style={styles.zanstextHeader}>
                             Data Ikan
                         </Text>
-                        <Text></Text>
+                        <Text><Button onPress={()=>this.removeToken()} title='Logout'/></Text>
                     </LinearGradient>
                 
                 <View style={styles.zansisi}>
